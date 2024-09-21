@@ -1,0 +1,42 @@
+# Carica i pacchetti
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+# Leggi il file CSV
+data <- read_csv("globalterrorismdb_0718dist.csv")
+str(data)  # Verifica la struttura del dataset
+
+# Crea un dataframe che conta il numero di attacchi per paese
+attacks_by_country <- data %>%
+  group_by(country_txt) %>%
+  summarise(n_attacks = n()) %>%
+  arrange(desc(n_attacks))
+
+# Seleziona i primi 33 paesi per numero di attacchi
+top_33_countries <- attacks_by_country %>%
+  top_n(33, n_attacks) %>%
+  arrange(desc(n_attacks))
+
+# Crea una palette di 33 tonalità di verde e inverti l'ordine
+shades_of_green <- rev(colorRampPalette(c("#2f3725", "#556544", "#94a980"))(33))
+
+# Ordina i paesi per numero di attacchi e assegna le tonalità
+top_33_countries <- top_33_countries %>%
+  arrange(desc(n_attacks))  # Assicura che siano ordinati per numero di attacchi
+
+# Crea il bar plot con le tonalità dal più scuro al più chiaro
+ggplot(top_33_countries, aes(y = reorder(country_txt, n_attacks), x = n_attacks, fill = factor(n_attacks))) +
+  geom_bar(stat = "identity", width = 0.7) +
+  scale_fill_manual(values = shades_of_green) +  # Applica la palette inversa
+  theme_minimal() +
+  labs(title = "Top 33 Paesi in funzione del numero di attacchi terroristici",
+       x = "Paesi",
+       y = "Numero di attacchi terroristici")+
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title.x = element_text(size = 14),
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    axis.title.y = element_text(size = 14),
+    legend.position = "none"
+  )
