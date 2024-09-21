@@ -1,0 +1,36 @@
+# Global terrorism based on years
+# Carica i pacchetti
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+# Leggi il file CSV
+data <- read_csv("globalterrorismdb_0718dist.csv")
+str(data)  # Verifica la struttura del dataset
+
+# Dataframe che conta il numero di attacchi teroristici in base all'anno
+attacks_by_year <- data %>%
+  group_by(iyear) %>%
+  summarise(n_attacks = n()) %>%
+  arrange(desc(n_attacks))
+attacks_by_year
+
+# Crea il bar plot con le tonalità che variano in funzione del numero di attacchi
+ggplot(attacks_by_year, aes(x = iyear, y = n_attacks, fill = n_attacks)) + 
+  geom_bar(stat = "identity", width = 0.7) +
+  scale_fill_gradient(low = "#809966", high = "#141810") +  # Colori personalizzati in esadecimale
+  theme_minimal() +
+  labs(title = "Numero di Attacchi Teroristici per Anno",
+       x = "Anno",
+       y = "Numero di Attacchi") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title.x = element_text(size = 14),
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    axis.title.y = element_text(size = 14),
+    legend.position = "none"
+  )
+
+# Verifica i dati per l'anno 1993
+attacks_by_year %>%
+  filter(iyear == 1993)  # Nell'anno 1993 il dataset non sembra essere completo
